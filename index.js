@@ -32,14 +32,6 @@ app.get("/api/users", (req, res) => {
     return res.send(mockUsers.filter((user) => user[filter].includes(value)));
 });
 
-app.post("/api/users", (req, res) => {
-  console.log(req.body);
-  const { body } = req;
-  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
-  mockUsers.push(newUser);
-  return res.status(201).send(newUser);
-});
-
 app.get("/api/users/:id", (req, res) => {
   console.log(req.params);
   const parsedId = parseInt(req.params.id);
@@ -56,6 +48,18 @@ app.get("/api/products", (req, res) => {
   res.send([{ id: 123, name: "chicken breast", price: 12.99 }]);
 });
 
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+app.post("/api/users", (req, res) => {
+  console.log(req.body);
+  const { body } = req;
+  const newUser = { id: mockUsers[mockUsers.length - 1].id + 1, ...body };
+  mockUsers.push(newUser);
+  return res.status(201).send(newUser);
+});
+
 app.put("/api/users/:id", (req, res) => {
   const {
     body,
@@ -69,6 +73,28 @@ app.put("/api/users/:id", (req, res) => {
   return res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.patch("/api/users/:id", (req, res) => {
+  const {
+    body,
+    params: { id },
+  } = req;
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+  const findUserIndex = mockUsers.findIndex((user) => user.id === parsedId);
+  if (findUserIndex === -1) return res.sendStatus(404);
+  mockUsers[findUserIndex] = { ...mockUsers[findUserIndex], ...body };
+  return res.sendStatus(200);
+});
+
+app.delete("/api/users/:id", (req, res) => {
+  const {
+    params: { id },
+  } = req;
+
+  const parsedId = parseInt(id);
+  if (isNaN(parsedId)) return res.sendStatus(400);
+  const findUserIndex = mockUsers.findIndex((user) => user.id === parsedId);
+  if (findUserIndex === -1) return res.sendStatus(404);
+  mockUsers.splice(findUserIndex, 1);
+  return res.sendStatus(200);
 });
